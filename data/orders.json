@@ -12,7 +12,7 @@
     "paymentMethod": "Cash on Delivery",
     "status": "Packed",
     "received": false,
-    "image": "images/products/marker_pens.jpg",
+    "image": "images/products/marker_pens.jpeg",
     "notes": "Packed, ships 12 Oct"
   },
   {
@@ -28,7 +28,7 @@
     "paymentMethod": "Cash on Delivery",
     "status": "Order Placed",
     "received": false,
-    "image": "images/products/nutrition_jar.jpg",
+    "image": "images/products/nutrition_jar.jpeg",
     "notes": "Pay online to save COD fee"
   },
   {
@@ -44,7 +44,7 @@
     "paymentMethod": "Cash on Delivery",
     "status": "Order Placed",
     "received": false,
-    "image": "images/products/tv_stand.jpg",
+    "image": "images/products/laptop_stand.jpeg",
     "notes": "Monitor / Desk Stand"
   },
   {
@@ -60,7 +60,7 @@
     "paymentMethod": "Cash on Delivery",
     "status": "On the Way",
     "received": false,
-    "image": "images/products/colored_pens.jpg",
+    "image": "images/products/colored_pens.jpeg",
     "notes": "At New Delhi West hub"
   },
   {
@@ -76,7 +76,7 @@
     "paymentMethod": "Cash on Delivery",
     "status": "On the Way",
     "received": false,
-    "image": "images/products/food_container.jpg",
+    "image": "images/products/food_container.jpeg",
     "notes": "Price not entered yet"
   }
 ]

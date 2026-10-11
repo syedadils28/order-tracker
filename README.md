@@ -58,11 +58,11 @@ order-tracker/
 │   └── orders.json     # Initial seed & permanent JSON records
 ├── images/
 │   └── products/       # Product images (marker pens, nutrition jar, etc.)
-│       ├── marker_pens.jpg
-│       ├── nutrition_jar.jpg
-│       ├── tv_stand.jpg
-│       ├── colored_pens.jpg
-│       └── food_container.jpg
+│       ├── marker_pens.jpeg
+│       ├── nutrition_jar.jpeg
+│       ├── laptop_stand.jpeg
+│       ├── colored_pens.jpeg
+│       └── food_container.jpeg
 ├── exports/
 │   ├── orders.xlsx     # Generated Excel report
 │   ├── orders.csv      # Generated CSV report

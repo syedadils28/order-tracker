@@ -24,7 +24,7 @@ const INITIAL_ORDERS = [
     paymentMethod: "Cash on Delivery",
     status: "Packed",
     received: false,
-    image: "images/products/marker_pens.jpg",
+    image: "images/products/marker_pens.jpeg",
     notes: "Packed, ships 12 Oct"
   },
   {
@@ -40,7 +40,7 @@ const INITIAL_ORDERS = [
     paymentMethod: "Cash on Delivery",
     status: "Order Placed",
     received: false,
-    image: "images/products/nutrition_jar.jpg",
+    image: "images/products/nutrition_jar.jpeg",
     notes: "Pay online to save COD fee"
   },
   {
@@ -56,7 +56,7 @@ const INITIAL_ORDERS = [
     paymentMethod: "Cash on Delivery",
     status: "Order Placed",
     received: false,
-    image: "images/products/tv_stand.jpg",
+    image: "images/products/laptop_stand.jpeg",
     notes: "Monitor / Desk Stand"
   },
   {
@@ -72,7 +72,7 @@ const INITIAL_ORDERS = [
     paymentMethod: "Cash on Delivery",
     status: "On the Way",
     received: false,
-    image: "images/products/colored_pens.jpg",
+    image: "images/products/colored_pens.jpeg",
     notes: "At New Delhi West hub"
   },
   {
@@ -88,19 +88,30 @@ const INITIAL_ORDERS = [
     paymentMethod: "Cash on Delivery",
     status: "On the Way",
     received: false,
-    image: "images/products/food_container.jpg",
+    image: "images/products/food_container.jpeg",
     notes: "Price not entered yet"
   }
 ];
 
 // Preset image choices for easy selection
 const PRESET_IMAGES = [
-  { name: "Marker Pens", url: "images/products/marker_pens.jpg" },
-  { name: "Nutrition Jar", url: "images/products/nutrition_jar.jpg" },
-  { name: "TV Stand", url: "images/products/tv_stand.jpg" },
-  { name: "Colored Pens", url: "images/products/colored_pens.jpg" },
-  { name: "Food Containers", url: "images/products/food_container.jpg" }
+  { name: "Marker Pens", url: "images/products/marker_pens.jpeg" },
+  { name: "Nutrition Jar", url: "images/products/nutrition_jar.jpeg" },
+  { name: "Laptop Stand", url: "images/products/laptop_stand.jpeg" },
+  { name: "Colored Pens", url: "images/products/colored_pens.jpeg" },
+  { name: "Food Containers", url: "images/products/food_container.jpeg" }
 ];
+
+// Helper to normalize image paths (handles renames from .jpg to .jpeg and tv_stand to laptop_stand)
+function normalizeImagePath(path) {
+  if (!path || typeof path !== "string") return path;
+  let normalized = path;
+  // Migrate tv_stand to laptop_stand
+  normalized = normalized.replace(/tv_stand\.(jpg|jpeg|png|webp)/gi, "laptop_stand.jpeg");
+  // Migrate any old .jpg extensions in images/products/ to .jpeg
+  normalized = normalized.replace(/images\/products\/(marker_pens|nutrition_jar|colored_pens|food_container|laptop_stand)\.jpg/gi, "images/products/$1.jpeg");
+  return normalized;
+}
 
 // App State
 let orders = [];
@@ -128,7 +139,18 @@ function loadOrders() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        orders = parsed;
+        let hasMigrated = false;
+        orders = parsed.map(order => {
+          const updatedImage = normalizeImagePath(order.image);
+          if (updatedImage !== order.image) {
+            hasMigrated = true;
+            return { ...order, image: updatedImage };
+          }
+          return order;
+        });
+        if (hasMigrated) {
+          saveOrders();
+        }
         return;
       }
     }
@@ -1164,7 +1186,7 @@ function handleOrderFormSubmit(e) {
   const actualDeliveryDate = document.getElementById("modalActualDate").value || null;
   let status = document.getElementById("modalStatus").value;
   let received = document.getElementById("modalReceived").checked;
-  const image = document.getElementById("modalImageUrl").value.trim();
+  const image = normalizeImagePath(document.getElementById("modalImageUrl").value.trim());
   const notes = document.getElementById("modalNotes").value.trim();
 
   // If marked received or status is Delivered
