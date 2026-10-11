@@ -540,25 +540,12 @@ function renderDashboardInsights() {
     .filter(o => !o.received && o.status !== "Cancelled" && o.status !== "Returned")
     .sort((a, b) => (a.expectedDeliveryDate || "9999").localeCompare(b.expectedDeliveryDate || "9999"));
 
-  // Calculate total amount for all in-transit & expected active orders
-  const totalActiveAmount = allActiveOrders.reduce((sum, o) => {
-    const p = o.price !== null && o.price !== "" && !isNaN(o.price) ? Number(o.price) * (Number(o.quantity) || 1) : 0;
-    return sum + p;
-  }, 0);
-
-  if (inTransitAmountBadge) {
-    if (allActiveOrders.length > 0) {
-      inTransitAmountBadge.style.display = "inline-flex";
-      inTransitAmountBadge.innerHTML = `<span>💰</span> Total: ${formatCurrency(totalActiveAmount)}`;
-      inTransitAmountBadge.title = `${allActiveOrders.length} expected orders awaiting delivery (Total: ${formatCurrency(totalActiveAmount)})`;
-    } else {
-      inTransitAmountBadge.style.display = "none";
-    }
-  }
-
   if (!container) return;
 
-  const activeOrders = allActiveOrders.slice(0, 5);
+  const activeOrders = orders
+    .filter(o => !o.received && o.status !== "Cancelled" && o.status !== "Returned")
+    .sort((a, b) => (a.expectedDeliveryDate || "9999").localeCompare(b.expectedDeliveryDate || "9999"))
+    .slice(0, 5);
 
   if (activeOrders.length === 0) {
     container.innerHTML = `
@@ -579,8 +566,9 @@ function renderDashboardInsights() {
     const qty = Number(o.quantity) || 1;
     const hasPrice = o.price !== null && o.price !== "" && !isNaN(o.price);
     const itemTotal = hasPrice ? Number(o.price) * qty : null;
-    const priceDisplay = hasPrice ? formatCurrency(itemTotal) : '<span style="color:var(--text-muted);font-weight:500;font-size:11.5px;font-style:italic;">Price Pending</span>';
-    const qtyDetail = qty > 1 && hasPrice ? ` (${qty} × ${formatCurrency(o.price)})` : "";
+    const pricePill = hasPrice
+      ? `<span class="quick-order-price-small">${formatCurrency(itemTotal)}${qty > 1 ? ` (${qty}x)` : ""}</span>`
+      : `<span style="color:var(--text-muted);font-size:11px;font-style:italic;">No price</span>`;
 
     return `
       <div class="dashboard-quick-order-item">
@@ -591,17 +579,13 @@ function renderDashboardInsights() {
             <div class="quick-order-sub">
               <span>${escapeHtml(o.platform || "Meesho")}</span>
               <span>•</span>
-              <span>Expected: <strong>${formatDate(o.expectedDeliveryDate)}</strong></span>
+              ${pricePill}
               <span>•</span>
-              <span class="quick-order-amount-inline">Amount: <strong style="color:var(--accent-green);font-weight:700;">${priceDisplay}${qtyDetail}</strong></span>
+              <span>Expected: <strong>${formatDate(o.expectedDeliveryDate)}</strong></span>
             </div>
           </div>
         </div>
-        <div class="quick-order-right">
-          <div class="quick-order-amount-box">
-            <div class="quick-order-amount-val">${priceDisplay}</div>
-            <div class="quick-order-amount-meta">${escapeHtml(o.paymentMethod || "COD")}</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           ${getStatusBadgeHtml(o.status, false)}
           <button type="button" class="btn btn-secondary btn-sm" onclick="handleToggleReceive('${o.id}', true)" title="Quick Mark as Received">
             ✓ Receive
