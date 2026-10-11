@@ -112,7 +112,7 @@
                 <div class="kpi-icon-badge purple">🚚</div>
               </div>
               <div class="kpi-value" id="kpiOnTheWay">0</div>
-              <div class="kpi-subtext">Dispatched / in transit</div>
+              <div class="kpi-subtext" id="kpiOnTheWaySubtext">Dispatched / in transit</div>
             </div>
 
             <div class="kpi-card">
@@ -151,9 +151,14 @@
             <!-- Active Shipments Card -->
             <div class="dashboard-card">
               <div class="dashboard-card-header">
-                <h3 class="dashboard-card-title">
-                  <span>🚚</span> In-Transit & Expected Orders
-                </h3>
+                <div class="dashboard-card-title-wrap">
+                  <h3 class="dashboard-card-title">
+                    <span>🚚</span> In-Transit & Expected Orders
+                  </h3>
+                  <span class="in-transit-amount-badge" id="inTransitAmountBadge" title="Total amount for pending / in-transit orders">
+                    Total: ₹0
+                  </span>
+                </div>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="navigateTo('orders')">
                   View All Orders →
                 </button>

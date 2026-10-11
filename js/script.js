@@ -523,6 +523,7 @@ function renderDashboardInsights() {
   const percentageEl = document.getElementById("fulfillmentPercentage");
   const deliveredCountEl = document.getElementById("fulfillmentDeliveredCount");
   const totalCountEl = document.getElementById("fulfillmentTotalCount");
+  const inTransitAmountBadge = document.getElementById("inTransitAmountBadge");
 
   // Calculate fulfillment stats
   const totalOrders = orders.length;
@@ -534,13 +535,30 @@ function renderDashboardInsights() {
   if (deliveredCountEl) deliveredCountEl.textContent = `${deliveredCount} Delivered`;
   if (totalCountEl) totalCountEl.textContent = `${totalOrders} Total Orders`;
 
+  // Active unreceived orders (earliest expected delivery first)
+  const allActiveOrders = orders
+    .filter(o => !o.received && o.status !== "Cancelled" && o.status !== "Returned")
+    .sort((a, b) => (a.expectedDeliveryDate || "9999").localeCompare(b.expectedDeliveryDate || "9999"));
+
+  // Calculate total amount for all in-transit & expected active orders
+  const totalActiveAmount = allActiveOrders.reduce((sum, o) => {
+    const p = o.price !== null && o.price !== "" && !isNaN(o.price) ? Number(o.price) * (Number(o.quantity) || 1) : 0;
+    return sum + p;
+  }, 0);
+
+  if (inTransitAmountBadge) {
+    if (allActiveOrders.length > 0) {
+      inTransitAmountBadge.style.display = "inline-flex";
+      inTransitAmountBadge.innerHTML = `<span>💰</span> Total: ${formatCurrency(totalActiveAmount)}`;
+      inTransitAmountBadge.title = `${allActiveOrders.length} expected orders awaiting delivery (Total: ${formatCurrency(totalActiveAmount)})`;
+    } else {
+      inTransitAmountBadge.style.display = "none";
+    }
+  }
+
   if (!container) return;
 
-  // Active unreceived orders (earliest expected delivery first)
-  const activeOrders = orders
-    .filter(o => !o.received && o.status !== "Cancelled" && o.status !== "Returned")
-    .sort((a, b) => (a.expectedDeliveryDate || "9999").localeCompare(b.expectedDeliveryDate || "9999"))
-    .slice(0, 4);
+  const activeOrders = allActiveOrders.slice(0, 5);
 
   if (activeOrders.length === 0) {
     container.innerHTML = `
@@ -558,20 +576,32 @@ function renderDashboardInsights() {
       ? `<img src="${escapeHtml(o.image)}" class="quick-order-thumb" alt="${escapeHtml(o.productName)}" onerror="this.outerHTML='<div class=\\'quick-order-thumb\\' style=\\'display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg-card)\\'>📦</div>'"/>`
       : `<div class="quick-order-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg-card)">📦</div>`;
 
+    const qty = Number(o.quantity) || 1;
+    const hasPrice = o.price !== null && o.price !== "" && !isNaN(o.price);
+    const itemTotal = hasPrice ? Number(o.price) * qty : null;
+    const priceDisplay = hasPrice ? formatCurrency(itemTotal) : '<span style="color:var(--text-muted);font-weight:500;font-size:11.5px;font-style:italic;">Price Pending</span>';
+    const qtyDetail = qty > 1 && hasPrice ? ` (${qty} × ${formatCurrency(o.price)})` : "";
+
     return `
       <div class="dashboard-quick-order-item">
         <div class="quick-order-left">
           ${thumbHtml}
           <div class="quick-order-info">
-            <span class="quick-order-name">${escapeHtml(o.productName)}</span>
+            <span class="quick-order-name" title="${escapeHtml(o.productName)}">${escapeHtml(o.productName)}</span>
             <div class="quick-order-sub">
               <span>${escapeHtml(o.platform || "Meesho")}</span>
               <span>•</span>
               <span>Expected: <strong>${formatDate(o.expectedDeliveryDate)}</strong></span>
+              <span>•</span>
+              <span class="quick-order-amount-inline">Amount: <strong style="color:var(--accent-green);font-weight:700;">${priceDisplay}${qtyDetail}</strong></span>
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div class="quick-order-right">
+          <div class="quick-order-amount-box">
+            <div class="quick-order-amount-val">${priceDisplay}</div>
+            <div class="quick-order-amount-meta">${escapeHtml(o.paymentMethod || "COD")}</div>
+          </div>
           ${getStatusBadgeHtml(o.status, false)}
           <button type="button" class="btn btn-secondary btn-sm" onclick="handleToggleReceive('${o.id}', true)" title="Quick Mark as Received">
             ✓ Receive
@@ -639,6 +669,7 @@ function renderSummaryCards() {
   let totalOrders = orders.length;
   let pendingOrders = 0;
   let onTheWayOrders = 0;
+  let onTheWayValue = 0;
   let deliveredOrders = 0;
   let cancelledOrders = 0;
   let totalOrderValue = 0;
@@ -660,6 +691,7 @@ function renderSummaryCards() {
       pendingOrderValue += itemTotal;
       if (o.status === "On the Way" || o.status === "Out for Delivery") {
         onTheWayOrders++;
+        onTheWayValue += itemTotal;
       }
     }
   });
@@ -667,6 +699,7 @@ function renderSummaryCards() {
   const kpiTotal = document.getElementById("kpiTotal");
   const kpiPending = document.getElementById("kpiPending");
   const kpiOnTheWay = document.getElementById("kpiOnTheWay");
+  const kpiOnTheWaySubtext = document.getElementById("kpiOnTheWaySubtext");
   const kpiDelivered = document.getElementById("kpiDelivered");
   const kpiCancelled = document.getElementById("kpiCancelled");
   const kpiTotalValue = document.getElementById("kpiTotalValue");
@@ -675,6 +708,9 @@ function renderSummaryCards() {
   if (kpiTotal) kpiTotal.textContent = totalOrders;
   if (kpiPending) kpiPending.textContent = pendingOrders;
   if (kpiOnTheWay) kpiOnTheWay.textContent = onTheWayOrders;
+  if (kpiOnTheWaySubtext) {
+    kpiOnTheWaySubtext.textContent = onTheWayValue > 0 ? `${formatCurrency(onTheWayValue)} in transit` : "Dispatched / in transit";
+  }
   if (kpiDelivered) kpiDelivered.textContent = deliveredOrders;
   if (kpiCancelled) kpiCancelled.textContent = cancelledOrders;
   if (kpiTotalValue) kpiTotalValue.textContent = formatCurrency(totalOrderValue);
@@ -707,8 +743,15 @@ function renderUpcomingAlert() {
   }
 
   const nextOrder = pendingOrders[0];
+  const nextAmount = nextOrder.price !== null && nextOrder.price !== "" && !isNaN(nextOrder.price)
+    ? ` • <strong style="color:var(--accent-green);">${formatCurrency(Number(nextOrder.price) * (Number(nextOrder.quantity) || 1))}</strong>`
+    : "";
+
   const pillsHtml = pendingOrders.slice(0, 3).map(o => {
-    return `<span class="upcoming-pill"><strong>${escapeHtml(o.productName)}</strong>: ${formatDate(o.expectedDeliveryDate)}</span>`;
+    const amt = o.price !== null && o.price !== "" && !isNaN(o.price)
+      ? ` • ${formatCurrency(Number(o.price) * (Number(o.quantity) || 1))}`
+      : "";
+    return `<span class="upcoming-pill"><strong>${escapeHtml(o.productName)}</strong>: ${formatDate(o.expectedDeliveryDate)}${amt}</span>`;
   }).join("");
 
   container.innerHTML = `
@@ -717,7 +760,7 @@ function renderUpcomingAlert() {
         <span class="upcoming-icon">🚚</span>
         <div class="upcoming-info">
           <h4>Next Expected Delivery: ${formatDate(nextOrder.expectedDeliveryDate)}</h4>
-          <p><strong>${escapeHtml(nextOrder.productName)}</strong> via ${escapeHtml(nextOrder.platform || "Meesho")} (${nextOrder.status})</p>
+          <p><strong>${escapeHtml(nextOrder.productName)}</strong> via ${escapeHtml(nextOrder.platform || "Meesho")} (${nextOrder.status})${nextAmount}</p>
         </div>
       </div>
       <div class="upcoming-list-pill">
