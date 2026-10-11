@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Tracker - Personal Shopping & Delivery Manager</title>
+  <meta name="description" content="Personal order tracking dashboard to track online shopping orders, delivery dates, and export reports in Excel, CSV, and Markdown.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+</head>
+<body data-theme="dark">
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">📦</div>
+        <div class="sidebar-brand">
+          <h1>Order Tracker</h1>
+          <span>Personal Shopping Hub</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Navigation</div>
+        <button class="nav-item active" data-nav="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-nav="orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          All Orders
+        </button>
+        <button class="nav-item" data-nav="ontheway">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          On The Way
+        </button>
+        <button class="nav-item" data-nav="delivered">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          Delivered / Received
+        </button>
+
+        <div class="nav-divider"></div>
+        <div class="nav-section-label">Data & Reports</div>
+        <button class="nav-item" data-nav="exports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export & Backup
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="connection-status">
+          <span class="status-dot"></span>
+          <span>Storage: <strong>Local Browser</strong></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="header-title-group">
+            <h2>Order Tracking Dashboard</h2>
+            <p>Manage, track and verify all online orders in one place</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Switch Theme (Dark / Light)">
+            <span id="themeToggleIcon">🌙</span>
+            <span id="themeToggleLabel">Dark</span>
+          </button>
+          <button class="btn btn-primary" id="addOrderBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add New Order
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+        <!-- VIEW 1: DASHBOARD -->
+        <div class="app-view" id="view-dashboard">
+          <!-- KPI Summary Cards -->
+          <section class="summary-cards-grid" id="summarySection">
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">Total Orders</span>
+                <div class="kpi-icon-badge blue">📦</div>
+              </div>
+              <div class="kpi-value" id="kpiTotal">0</div>
+              <div class="kpi-subtext">All tracked purchases</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">Pending Orders</span>
+                <div class="kpi-icon-badge amber">⏳</div>
+              </div>
+              <div class="kpi-value" id="kpiPending">0</div>
+              <div class="kpi-subtext">Awaiting delivery</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">On The Way</span>
+                <div class="kpi-icon-badge purple">🚚</div>
+              </div>
+              <div class="kpi-value" id="kpiOnTheWay">0</div>
+              <div class="kpi-subtext">Dispatched / in transit</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">Delivered</span>
+                <div class="kpi-icon-badge green">✅</div>
+              </div>
+              <div class="kpi-value" id="kpiDelivered">0</div>
+              <div class="kpi-subtext">Received orders</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">Total Value</span>
+                <div class="kpi-icon-badge teal">💰</div>
+              </div>
+              <div class="kpi-value" id="kpiTotalValue">₹0</div>
+              <div class="kpi-subtext">Cumulative spending</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-card-top">
+                <span class="kpi-title">Pending Amount</span>
+                <div class="kpi-icon-badge red">💵</div>
+              </div>
+              <div class="kpi-value" id="kpiPendingValue">₹0</div>
+              <div class="kpi-subtext">Unreceived order value</div>
+            </div>
+          </section>
+
+          <!-- Upcoming Deliveries Alert Banner -->
+          <div id="upcomingAlertContainer"></div>
+
+          <!-- Dashboard Highlights Grid -->
+          <div class="dashboard-insights-grid">
+            <!-- Active Shipments Card -->
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                  <span>🚚</span> In-Transit & Expected Orders
+                </h3>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="navigateTo('orders')">
+                  View All Orders →
+                </button>
+              </div>
+              <div class="dashboard-quick-orders-list" id="dashboardQuickOrdersList">
+                <!-- Dynamically populated by js/script.js -->
+              </div>
+            </div>
+
+            <!-- Shopping Platform Breakdown Card -->
+            <div class="dashboard-card" id="platformBreakdownCard">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                  <span>🛍️</span> Orders by Platform
+                </h3>
+                <span style="font-size: 11.5px; color: var(--text-muted);" id="platformTotalBadge">0 Platforms</span>
+              </div>
+              
+              <div id="platformDistributionList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Dynamically populated by js/script.js -->
+              </div>
+            </div>
+
+            <!-- Delivery Progress & Stats Card -->
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                  <span>📊</span> Delivery Progress & Summary
+                </h3>
+              </div>
+              
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:600;">
+                  <span>Fulfillment Rate</span>
+                  <span id="fulfillmentPercentage">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" id="fulfillmentProgressBar" style="width: 0%;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);">
+                  <span id="fulfillmentDeliveredCount">0 Delivered</span>
+                  <span id="fulfillmentTotalCount">0 Total</span>
+                </div>
+              </div>
+
+              <div style="background:var(--bg-muted);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:14px;display:flex;flex-direction:column;gap:8px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-main);">Quick Shortcuts</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openOrderModal()">
+                    ＋ Add Order
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="navigateTo('ontheway')">
+                    🚚 On The Way
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="navigateTo('exports')">
+                    📁 Export Reports
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: ORDERS (All Orders, On The Way, Delivered) -->
+        <div class="app-view" id="view-orders" style="display: none;">
+          <!-- Filter, Search & View Controls Toolbar -->
+          <section class="toolbar-section">
+            <div class="toolbar-left">
+              <div class="search-input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search product name, order #, notes...">
+              </div>
+
+              <select id="statusFilter" class="filter-select" title="Filter by Status">
+                <option value="all">All Statuses</option>
+                <option value="Pending">All Pending</option>
+                <option value="Order Placed">Order Placed</option>
+                <option value="Packed">Packed</option>
+                <option value="On the Way">On the Way</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Returned">Returned</option>
+              </select>
+
+              <select id="platformFilter" class="filter-select" title="Filter by Shopping Platform">
+                <option value="all">All Platforms</option>
+                <option value="Meesho">Meesho</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Flipkart">Flipkart</option>
+                <option value="Myntra">Myntra</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <select id="sortBy" class="filter-select" title="Sort Orders">
+                <option value="expected-asc">Delivery: Soonest First</option>
+                <option value="expected-desc">Delivery: Latest First</option>
+                <option value="ordered-desc">Ordered: Newest First</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="price-low">Price: Low to High</option>
+              </select>
+            </div>
+
+            <div class="toolbar-right">
+              <span id="ordersCountBadge" style="font-size:12px;color:var(--text-muted);font-weight:500;">0 orders</span>
+              <div class="view-mode-toggle">
+                <button class="view-btn active" id="viewTableBtn" title="Table View">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                <button class="view-btn" id="viewGridBtn" title="Card Grid View">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Orders Table View -->
+          <div class="orders-table-wrapper" id="tableContainer">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th style="width: 48px;">Status</th>
+                  <th>Product Details</th>
+                  <th>Platform</th>
+                  <th>Order No</th>
+                  <th>Expected By</th>
+                  <th>Price</th>
+                  <th>Mark Received</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <!-- Dynamically populated by js/script.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Orders Card / Grid View -->
+          <div class="orders-grid-view" id="gridContainer" style="display: none;">
+            <!-- Dynamically populated by js/script.js -->
+          </div>
+        </div>
+
+        <!-- VIEW 3: EXPORTS & BACKUP -->
+        <div class="app-view" id="view-exports" style="display: none;">
+          <div>
+            <h3 style="font-size:18px;font-weight:700;color:var(--text-main);">Export Records & Data Tools</h3>
+            <p style="font-size:12.5px;color:var(--text-muted);margin-top:2px;">Generate spreadsheets and text reports or back up your complete order database.</p>
+          </div>
+
+          <div class="export-cards-grid">
+            <div class="export-card">
+              <div class="export-card-icon">📊</div>
+              <div class="export-card-title">Microsoft Excel (.xlsx)</div>
+              <div class="export-card-desc">Download a complete Excel workbook featuring both the itemized <strong>Orders</strong> worksheet and a dynamic <strong>Summary</strong> KPI report.</div>
+              <button class="btn btn-outline-primary" id="exportXlsxBtn">
+                ⬇ Download Excel (.xlsx)
+              </button>
+            </div>
+
+            <div class="export-card">
+              <div class="export-card-icon">📄</div>
+              <div class="export-card-title">CSV Spreadsheet (.csv)</div>
+              <div class="export-card-desc">Standard comma-separated table with UTF-8 BOM encoding, ready to open in Excel, Google Sheets, or Numbers.</div>
+              <button class="btn btn-secondary" id="exportCsvBtn">
+                ⬇ Download CSV
+              </button>
+            </div>
+
+            <div class="export-card">
+              <div class="export-card-icon">📝</div>
+              <div class="export-card-title">Markdown Report (.md)</div>
+              <div class="export-card-desc">Clean GitHub-flavored markdown report with summary badges and table formatting for documentation.</div>
+              <button class="btn btn-secondary" id="exportMdBtn">
+                ⬇ Download Markdown
+              </button>
+            </div>
+
+            <div class="export-card">
+              <div class="export-card-icon">💾</div>
+              <div class="export-card-title">Backup Database (JSON)</div>
+              <div class="export-card-desc">Download a complete snapshot backup of all order records to safely keep on your personal computer.</div>
+              <button class="btn btn-secondary" id="backupJsonBtn">
+                ⬇ Download Backup JSON
+              </button>
+            </div>
+
+            <div class="export-card">
+              <div class="export-card-icon">🔄</div>
+              <div class="export-card-title">Restore from Backup</div>
+              <div class="export-card-desc">Restore your order records from a previously saved JSON backup file. Replaces current records.</div>
+              <button class="btn btn-secondary" id="restoreJsonBtn">
+                ⬆ Select Backup File
+              </button>
+              <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+            </div>
+
+            <div class="export-card">
+              <div class="export-card-icon">📥</div>
+              <div class="export-card-title">Import Orders from CSV</div>
+              <div class="export-card-desc">Import external order lists from CSV. Automatically validates columns and filters out duplicate orders.</div>
+              <button class="btn btn-primary" id="importCsvBtn">
+                ⬆ Import from CSV
+              </button>
+              <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add / Edit Order Modal -->
+  <div class="modal-backdrop" id="orderModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="orderModalTitle">Add New Order</h3>
+        <button type="button" class="modal-close-btn" id="closeOrderModal" aria-label="Close">✕</button>
+      </div>
+
+      <form id="orderForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="modalProductName">Product Name *</label>
+            <input type="text" id="modalProductName" class="form-control" placeholder="e.g. 48 Marker Pen Set" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalPlatform">Shopping Platform</label>
+              <select id="modalPlatform" class="form-control">
+                <option value="Meesho">Meesho</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Flipkart">Flipkart</option>
+                <option value="Myntra">Myntra</option>
+                <option value="Ajio">Ajio</option>
+                <option value="Blinkit">Blinkit</option>
+                <option value="Zepto">Zepto</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modalOrderNo">Order Number</label>
+              <input type="text" id="modalOrderNo" class="form-control" placeholder="e.g. 340886586005635776">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalPrice">Price (₹)</label>
+              <input type="number" id="modalPrice" class="form-control" placeholder="e.g. 260" min="0" step="any">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modalQuantity">Quantity</label>
+              <input type="number" id="modalQuantity" class="form-control" value="1" min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalPayment">Payment Method</label>
+              <select id="modalPayment" class="form-control">
+                <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                <option value="Online / UPI">Online / UPI</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+                <option value="Net Banking">Net Banking</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modalStatus">Order Status</label>
+              <select id="modalStatus" class="form-control">
+                <option value="Order Placed">Order Placed</option>
+                <option value="Packed">Packed</option>
+                <option value="On the Way">On the Way</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Returned">Returned</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalOrderedDate">Ordered Date</label>
+              <input type="date" id="modalOrderedDate" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modalExpectedDate">Expected Delivery Date</label>
+              <input type="date" id="modalExpectedDate" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalActualDate">Actual Delivery Date (if received)</label>
+              <input type="date" id="modalActualDate" class="form-control">
+            </div>
+
+            <div class="form-group" style="justify-content: flex-end; padding-bottom: 8px;">
+              <label class="receive-checkbox-label">
+                <input type="checkbox" id="modalReceived" class="receive-checkbox">
+                <span>Mark as Received (Delivered)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group image-selector-group">
+            <label class="form-label">Product Image</label>
+            <div class="image-uploader-card">
+              <div class="uploader-preview-wrapper" id="imagePreviewWrapper">
+                <img id="imagePreviewImg" src="" alt="Preview" style="display: none;">
+                <div id="imagePreviewPlaceholder" class="uploader-placeholder-icon">📸</div>
+              </div>
+              <div class="uploader-actions">
+                <input type="file" id="modalImageFileInput" accept="image/*" style="display: none;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="uploadImageBtn">
+                    📁 Upload Photo
+                  </button>
+                  <button type="button" class="btn btn-sm" id="removeImageBtn" style="display: none; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                    ✕ Remove Photo
+                  </button>
+                </div>
+                <span class="uploader-tip">Upload any photo from your device, or select a sample below:</span>
+              </div>
+            </div>
+            
+            <input type="text" id="modalImageUrl" class="form-control" placeholder="Or enter image URL / relative file path..." style="margin-top: 6px;">
+
+            <div style="margin-top: 4px;">
+              <span style="font-size: 11px; color: var(--text-muted);">Quick preset sample product photos:</span>
+              <div class="preset-images-list" id="presetImagesContainer"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modalNotes">Notes & Tracking Info</label>
+            <textarea id="modalNotes" class="form-control" placeholder="e.g. Pay online to save COD fee, hub details, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelOrderModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveOrderBtn">Save Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal-dialog" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Order</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this order?</p>
+        <p><strong id="deleteItemName" style="color:var(--text-main);"></strong></p>
+        <p style="font-size:12px;color:var(--text-muted);">This action will remove the record from your tracker.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- SheetJS Library for Pure Client-side Excel (.xlsx) Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Application Logic -->
+  <script src="js/script.js"></script>
+</body>
+</html>
