@@ -1113,7 +1113,16 @@ function openOrderModal(orderId = null) {
     updateImagePreview("");
   }
 
+  const saveBtn = document.getElementById("saveOrderBtn");
+  if (saveBtn) {
+    saveBtn.innerHTML = orderId
+      ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Save Changes`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save Order`;
+  }
+
   modal.classList.add("open");
+  const modalBody = modal.querySelector(".modal-body");
+  if (modalBody) modalBody.scrollTop = 0;
 }
 
 function closeOrderModalHandler() {
